@@ -1,1 +1,35 @@
-omer
+                                                  **GNU General Public License version 2  (Version 2, June 1991)**
+
+The GNU General Public License, often shortened to GNU GPL (or simply GPL), lists terms and conditions for copying, modifying and distributing free software. 
+
+The GPL was created by Richard Stallman in order to protect GNU software from being made proprietary. 
+
+It’s the most used licenses which end users (individuals, organizations, companies).
+
+
+
+
+
+It is a specific implementation of his "copyleft" concept. 
+
+According to Stallman, copyleft is a derivative of copyright law that serves "the opposite of its usual purpose: instead of a means of privatizing software, it becomes a means of keeping software free." (The name was taken from the humorous slogan, "Copyleft -- all rights reversed.")
+
+Copyleft:
+
+
+
+Copyleft is a general method for making a program (or other work) free (in the sense of freedom, not “zero price”), and requiring all modified and extended versions of the program to be free as well.
+
+
+
+
+
+
+
+
+
+Sponsored by the Free Software Foundation (FSF) 
+
+ the Free Software Foundation (FSF) is a nonprofit with a worldwide mission to promote computer user freedom. 
+
+FSF defend the rights of all software users
