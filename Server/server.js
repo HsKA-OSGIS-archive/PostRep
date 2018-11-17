@@ -4,6 +4,12 @@ var app = express();
 
 var connectionString = "postgres://user:user@localhost:5432/aga";
 
+app.all('/', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next()
+});
+
 app.get('/', function (req, res, next) {
     pg.connect(connectionString,function(err,client,done) {
        if(err){

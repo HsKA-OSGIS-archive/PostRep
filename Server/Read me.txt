@@ -42,6 +42,6 @@ app.listen(4000, function () {
 
 
 
-1- sudo apt install npm
-2- npm init                 //not necessary to use
-3- npm install express pg --save
+4- sudo apt install npm
+5- npm init                 //not necessary to use
+6- npm install express pg --save
