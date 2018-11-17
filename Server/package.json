@@ -1,0 +1,8 @@
+{
+  "name": "node-pg",
+  "author": "Javascript Point",
+  "dependencies": {
+    "express": "^4.16.4",
+    "pg": "^6.4.2"
+  }
+}
