@@ -1,0 +1,8 @@
+
+**************Voroni*********************
+
+
+Points in  convex polygons 
+Each polygon contains exactly one point 
+Every point in a polygon is closer to its generating point than to any other
+Also known as a Dirichlet tessellation or cells are called Dirichlet regions,Thiessen polytopes, or Voronoi polygons.
