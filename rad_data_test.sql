@@ -15,21 +15,22 @@ CREATE SCHEMA stg;
 
 
 CREATE TABLE stg.rad_data (
-    id integer, 
-    place text, 
-    x text, 
-    y text, 
-    z text, 
-    date text, 
+    id integer,
+    place text,
+    x text,
+    y text,
+    z text,
+    date text,
     val text
 );
 
-\copy stg.rad_data from '/media/sf_e/vm_exchange/data.csv' delimiter ',' csv header
+-- \copy stg.rad_data from '/media/sf_e/vm_exchange/data.csv' delimiter ',' csv header
 
 
+/*
 SELECT *
 FROM stg.rad_data LIMIT 10;
-
+*/
 
 CREATE SCHEMA proc;
 
@@ -95,20 +96,20 @@ SET val = b.val
 FROM proc.in_data AS b
 WHERE st_intersects(a.geom, b.geom)
   AND b.date = '2015-10-12 21:50:00';
-  
-  
-  
-  
+
+
+
+
 CREATE TABLE proc.delaunay AS
   (SELECT NULL::double PRECISION AS val,
           '2015-10-12 21:50:00'::TIMESTAMP AS date,
           (ST_Dump(ST_CollectionExtract(ST_DelaunayTriangles(ST_Collect(DISTINCT geom)) ,3))).geom::geometry(polygon,4326)
    FROM proc.in_data
    WHERE date = '2015-10-12 21:50:00');
-   
+
 
 CREATE INDEX ON proc.delaunay USING gist(geom);
-   
+
 UPDATE proc.delaunay AS a
 SET val = b.val
 FROM proc.in_data AS b
