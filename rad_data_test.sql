@@ -24,7 +24,7 @@ CREATE TABLE stg.rad_data (
     val text
 );
 
--- \copy stg.rad_data from '/media/sf_e/vm_exchange/data.csv' delimiter ',' csv header
+-- \copy stg.rad_data from '/home/user/PostRep/data.csv' delimiter ',' csv header
 
 
 /*

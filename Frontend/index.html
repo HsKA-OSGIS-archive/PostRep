@@ -2,32 +2,29 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title></title>
+
+    <script src="libs/leaflet-src.js"></script>
+    <link rel="stylesheet" href="libs/leaflet.css" />
+    <title>OSGIS</title>
   </head>
   <body>
-    <div class="test">
-      I am Test box
-    </div>
 
-    <div id="respond" style="background-color:lightblue;">
+    <div id="map" style="position: fixed;height: 100%; width: 100%;background-color:lightblue;">
       I am respond box
     </div>
 
-    <script type="text/javascript">
-      var xhttp = new XMLHttpRequest();
-      var url = "http://localhost:4000";
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          console.log(xhttp.responseText);
-          document.getElementById('respond').innerHTML = xhttp.responseText;
-           // Action to be performed when the document is read;
-        }
-      };
-      xhttp.open("GET", url, true);
-      xhttp.setRequestHeader('Content-Type', 'text/plain');
+    <div id="control" style="color:white;position: fixed;border-radius: 20px;padding: 15px;right:3%;top:8%;height: 80%; width: 20%;background-color:rgba(0,0,0,.9);">
+      I am control panel
+      <select id="date" name="date" style="position:absolute; width: 50%;top:10%; left: 15px;">
+          <!--option value="volvo">Volvo</option>
+          <option value="saab">Saab</option>
+          <option value="fiat">Fiat</option>
+          <option value="audi">Audi</option-->
+        </select>
+    </div>
 
-      xhttp.send();
-    </script>
+    <script type="text/javascript" src="script_date.js"> </script>
+    <script type="text/javascript" src="script.js"> </script>
 
   </body>
 </html>
