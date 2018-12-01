@@ -1,10 +1,13 @@
-
+var mymap=L.map('map').setView([ 48.79228, 9],6);
 function draw(geom){
-
+	if(mymap!=null){
+		mymap.remove()
+		mymap=L.map('map').setView([ 48.79228, 9],6);
+	}
 var hoverColor = "white"
 var defaultColor = "green"
 var opacityColor = 0.6;
-var mymap=L.map('map').setView([ 48.79228, 9],6);
+
 
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
