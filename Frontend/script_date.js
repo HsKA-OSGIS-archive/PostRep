@@ -26,7 +26,13 @@ xhttp2.open("GET", url, true);
 xhttp2.setRequestHeader('Content-Type', 'text/plain');
 
 xhttp2.send();
+function downloadVoronoi(){
+	var str = document.getElementById("date").selectedOptions[0].innerHTML
+	str = str.split(" ").join("+")
+	var url = "http://localhost:4000/voronoi/download/"+str;
 
+	window.open(url, '_blank');
+}
 function getVoronoi(){
 	var str = document.getElementById("date").selectedOptions[0].innerHTML
 	str = str.split(" ").join("+")
