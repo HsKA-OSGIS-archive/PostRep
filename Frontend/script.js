@@ -31,12 +31,12 @@ function highlightFeature(e) {
         				fillColor: hoverColor,
         				weight: 2,
         				opacity: 1,
-        				color: "black",
+        				color: "white",
         				dashArray: '',
         				fillOpacity: opacityColor
         			});
 
-   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge)        			layer.bringToFront();
+   //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge)        			layer.bringToFront();
 }
 
 function resetHighlight(e) {
@@ -49,7 +49,7 @@ function resetHighlight(e) {
         				dashArray: '',
         				fillOpacity: opacityColor
         			});
-   if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge)        			layer.bringToFront();
+   //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge)        			layer.bringToFront();
 }
 
 function onEachFeature(feature,layer){
@@ -72,6 +72,18 @@ function onEachFeature(feature,layer){
   }
 }
 
+function draw_point(geom){
+	for(var i=0;i<geom.length;i++){
+		var geo= JSON.parse(geom[i].geometry)
+		geo =geo.coordinates
+		var circle = L.circle([geo[1],geo[0]], {
+	    color: '#333',
+	    fillColor: '#333',
+	    fillOpacity: 1,
+	    radius: 50
+		}).addTo(mymap);
+	}
+}
 
 
 var xhttp = new XMLHttpRequest();

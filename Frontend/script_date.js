@@ -32,17 +32,39 @@ function getVoronoi(){
 	str = str.split(" ").join("+")
 	var xhttp3 = new XMLHttpRequest();
 	var url = "http://localhost:4000/voronoi/"+str;
-	var respond_date2;
 	xhttp3.onreadystatechange = function() {
 	  if (this.readyState == 4 && this.status == 200) {
 	    console.log("I am date respond"+xhttp3.responseText);
-	    respond_date2 = JSON.parse(xhttp3.responseText);
+			var respond_date2 = JSON.parse(xhttp3.responseText);
 	     // Action to be performed when the document is read;
 	    draw(respond_date2);
+			getPoint(str)
 	  }
 	};
 	xhttp3.open("GET", url, true);
 	xhttp3.setRequestHeader('Content-Type', 'text/plain');
 
 	xhttp3.send();
+}
+
+
+function getPoint(str){
+		var url = "http://localhost:4000/point/"+str;
+
+		var xhttp4 = new XMLHttpRequest();
+
+
+		xhttp4.onreadystatechange = function() {
+		  if (this.readyState == 4 && this.status == 200) {
+		    console.log("I am date respond"+xhttp4.responseText);
+		    var respond_date3 = JSON.parse(xhttp4.responseText);
+		     // Action to be performed when the document is read;
+		    draw_point(respond_date3);
+		  }
+		};
+		xhttp4.open("GET", url, true);
+		xhttp4.setRequestHeader('Content-Type', 'text/plain');
+
+		xhttp4.send();
+
 }

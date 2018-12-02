@@ -76,6 +76,34 @@ app.get('/voronoi/:date', function (req, res, next) {
                console.log(err);
                res.status(400).send(err);
            }
+           //console.log(result);
+           res.status(200).send(result.rows);
+       });
+    });
+
+});
+
+app.get('/point/:date', function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+
+    pg.connect(connectionString,function(err,client,done) {
+       if(err){
+           console.log("not able to get connection "+ err);
+           res.status(400).send(err);
+       }
+       var rdate =""+req.params.date
+
+       rdate = rdate.split("+").join(" ");
+       console.log(rdate);
+       var sql ="select ST_asgeoJSON(geom) as geometry from proc.in_data where date='"+rdate+"';"
+
+       client.query(sql, function(err,result) {
+           done(); // closing the connection;
+           if(err){
+               console.log(err);
+               res.status(400).send(err);
+           }
            console.log(result);
            res.status(200).send(result.rows);
        });
