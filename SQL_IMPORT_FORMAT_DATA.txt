@@ -1,0 +1,62 @@
+
+CREATE TABLE opensource.radiological_data (
+    id integer, 
+    place text, 
+    x text, 
+    y text, 
+    z text, 
+    date text, 
+    time text,
+    value text
+);
+
+copy opensource.radiological_data from '/home/user/Downloads/rad_data.csv' delimiter ';' csv header
+
+SELECT * FROM opensource.radiological_data LIMIT 10;
+SELECT (date || ';' || time) FROM opensource.radiological_data LIMIT 10;
+
+ALTER TABLE opensource.radiological_data ADD fulldate text;
+INSERT INTO fulldate SELECT (date || ';' || time) FROM opensource.radiological_data;
+INSERT INTO opensource.radiological_data(fulldate) SELECT (date || ';' || time) AS 'fulldate' FROM opensource.radiological_data;
+UPDATE opensource.radiological_data SET fulldate = (SELECT (date || ';' || time) FROM opensource.radiological_data);
+
+SELECT * FROM opensource.radiological_data LIMIT 10;
+INSERT INTO opensource.radiological_data (fulldate) SELECT (date|| ' ' || time) FROM opensource.radiological_data;
+UPDATE opensource.radiological_data SET fulldate = (SELECT (date|| ' ' || time) FROM opensource.radiological_data);
+SELECT * FROM opensource.radiological_data LIMIT 10;
+Update opensource.radiological_data set fulldate = (date|| ' ' || time );
+SELECT * FROM opensource.radiological_data LIMIT 10;
+alter table opensource.radiological_data
+drop column fulldate;
+UPDATE opensource.radiological_data SET fulldate =CONCAT_WS('.',date,time)
+
+
+
+CREATE SCHEMA opensource;
+
+
+CREATE TABLE opensource.radiological_data (
+    id integer, 
+    place text, 
+    x text, 
+    y text, 
+    z text, 
+    date text, 
+    time text,
+    value text
+);
+copy opensource.radiological_data from '/home/user/Downloads/rad_data.csv' delimiter ';' csv header
+
+
+ALTER TABLE opensource.radiological_data ADD daate text;
+SELECT * FROM opensource.radiological_data LIMIT 10;
+INSERT INTO opensource.radiological_data (daate) VALUES ('1');
+update opensource.radiological_data set daate = date|| ';' || time;
+
+
+alter table opensource.radiological_data
+drop column time;
+
+
+alter table opensource.radiological_data
+drop column date;
