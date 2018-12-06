@@ -1,0 +1,11 @@
+
+*************************TIN**********************************
+
+
+Triangulated Irregular Network 
+Vector-based representation of a surface.
+TINs are commonly used in terrain representation 
+But usable for  representing other variables which can be as surfaces.
+TINs consist a series of contiguous, non-overlapping triangles that are known as faces.
+Created from  a series of points using a technique called Delaunay triangulation
+TINs are also used to construct Thiessen polygons, which form the basis for interpolating to areas.

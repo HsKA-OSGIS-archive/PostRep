@@ -1,0 +1,48 @@
+1- sudo apt-get update
+   sudo apt-get install nodejs
+
+2- in the folder create files package.json
+{
+  "name": "node-pg",
+  "author": "Javascript Point",
+  "dependencies": {
+    "express": "^4.16.4",
+    "pg": "^6.4.2"
+  }
+}
+3- in the folder create server.js
+Example code:
+
+var express = require('express');
+var pg = require("pg");
+var app = express();
+
+var connectionString = "postgres://user:user@localhost:5432/aga";
+
+app.get('/', function (req, res, next) {
+    pg.connect(connectionString,function(err,client,done) {
+       if(err){
+           console.log("not able to get connection "+ err);
+           res.status(400).send(err);
+       }
+       client.query('SELECT * FROM student where id = $1', [1],function(err,result) {
+           done(); // closing the connection;
+           if(err){
+               console.log(err);
+               res.status(400).send(err);
+           }
+           res.status(200).send(result.rows);
+       });
+    });
+});
+
+app.listen(4000, function () {
+    console.log('Server is running.. on Port 4000');
+});
+
+
+
+4- sudo apt install npm
+5- npm init                 //not necessary to use
+6- npm install express pg --save
+7- in PostRep/Server forlder $ nodejs server.js

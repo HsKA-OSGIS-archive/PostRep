@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+
+    <script src="libs/leaflet-src.js"></script>
+    <link rel="stylesheet" href="libs/leaflet.css" />
+    <title>OSGIS</title>
+  </head>
+  <body>
+
+    <div id="map" style="position: fixed;height: 100%; width: 100%;background-color:lightblue;">
+      I am respond box
+    </div>
+
+    <div id="control" style="color:white;position: fixed;border-radius: 20px;padding: 15px;right:3%;top:8%;height: 80%; width: 20%;background-color:rgba(0,0,0,.9);">
+      I am control panel
+      <select id="date" name="date" style="position:absolute; width: 50%;top:10%; left: 15px;">
+          <!--option value="volvo">Volvo</option>
+          <option value="saab">Saab</option>
+          <option value="fiat">Fiat</option>
+          <option value="audi">Audi</option-->
+        </select>
+
+        <button type="button" name="button" onclick="getVoronoi()" style="position:absolute; width: 50%;top:15%; left: 15px;"> GET
+        </button>
+
+        <button type="button" name="button" onclick="downloadVoronoi()" style="position:absolute; width: 50%;top:20%; left: 15px;"> download voronoi
+        </button>
+
+    </div>
+
+    <script type="text/javascript" src="script_date.js"> </script>
+    <script type="text/javascript" src="script.js"> </script>
+
+  </body>
+</html>
