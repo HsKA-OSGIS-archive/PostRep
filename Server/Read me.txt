@@ -46,3 +46,5 @@ app.listen(4000, function () {
 5- npm init                 //not necessary to use
 6- npm install express pg --save
 7- in PostRep/Server forlder $ nodejs server.js
+
+8- No it is so far done
