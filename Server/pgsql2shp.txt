@@ -1,0 +1,3 @@
+pgsql2shp -f /home/user/PostRep/Server/export/1 -h localhost -p5432 -u user -g geom rad "select date, geom from proc.in_data"
+
+zip 1.zip ~/PostRep/Server/export/1.*

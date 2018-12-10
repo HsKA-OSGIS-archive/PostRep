@@ -1,4 +1,4 @@
-                                                  **GNU General Public License version 2  (Version 2, June 1991)**
+                                                 ***GNU General Public License version 2  (Version 2, June 1991)***
 
 The GNU General Public License, often shortened to GNU GPL (or simply GPL), lists terms and conditions for copying, modifying and distributing free software. 
 
