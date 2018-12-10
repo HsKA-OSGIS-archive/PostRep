@@ -14,7 +14,7 @@ CREATE TABLE stg.rad_data (
     z text,
     date text, 
     time text,
-    value text
+    val text
 );
 
 
