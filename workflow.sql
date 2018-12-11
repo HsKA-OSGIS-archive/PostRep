@@ -41,30 +41,30 @@ CREATE SCHEMA proc;
 
 
 
-CREATE TABLE proc.table1(id integer,place text,x text,y text,z text);
+CREATE TABLE proc.Station_info (id integer,place text,x text,y text,z text);
 
 
-CREATE TABLE proc.table2(id integer,place text,date text,value text);
-
-
-
-INSERT INTO proc.table1 SELECT id,place,x,y,z FROM stg.rad_data;
-
-
-INSERT INTO proc.table2 SELECT id,place,date,val FROM stg.rad_data;
+CREATE TABLE proc.Records_info (id integer,place text,date text,value text);
 
 
 
-
-ALTER TABLE proc.table1 ADD PRIMARY KEY (id);
-ALTER TABLE proc.table2 ADD PRIMARY KEY (id);
+INSERT INTO proc.Station_info SELECT id,place,x,y,z FROM stg.rad_data;
 
 
-SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc1.table2 AS b JOIN proc1.table1 AS a ON a.id = b.id;
+INSERT INTO proc.Records_info SELECT id,place,date,val FROM stg.rad_data;
 
 
 
-CREATE TABLE proc.table3  (
+
+ALTER TABLE proc.Station_info ADD PRIMARY KEY (id);
+ALTER TABLE proc.Records_info ADD PRIMARY KEY (id);
+
+
+SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc.Records_info AS b JOIN proc.Station_info AS a ON a.id = b.id;
+
+
+
+CREATE TABLE proc.Station_Records  (
     id integer,
     place text,
     x text,
@@ -74,7 +74,7 @@ CREATE TABLE proc.table3  (
     val text
 );
 
-INSERT INTO proc.table3 SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc1.table2 AS b JOIN proc1.table1 AS a ON a.id = b.id;
+INSERT INTO proc.Station_Records SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc.Records_info AS b JOIN proc.Station_info AS a ON a.id = b.id;
 
 
 
