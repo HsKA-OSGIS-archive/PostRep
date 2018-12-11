@@ -1,7 +1,7 @@
 import csv
 from random import randint, uniform, random, randrange
  
- 
+ # Empty data
 data_list = list()
 coord_x = list()
 all_values =list()
