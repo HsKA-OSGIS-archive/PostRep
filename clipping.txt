@@ -1,0 +1,110 @@
+CREATE extension postgis;
+
+
+CREATE SCHEMA stg;
+
+
+CREATE TABLE stg.rad_data (
+    id integer, 
+    place text, 
+    x text, 
+    y text, 
+    z text, 
+    date text, 
+    val text
+);
+
+copy stg.rad_data from '/home/user/Downloads/data.csv' delimiter ',' csv header
+CREATE SCHEMA proc;
+
+CREATE TABLE proc.in_data AS
+  ( SELECT id,
+           place,
+           z::double PRECISION AS height,
+           date::TIMESTAMP,
+           val::double PRECISION,
+           ST_SetSRID(ST_MakePoint(x::double PRECISION, y::double PRECISION), 4326)::geometry(point, 4326) AS geom,
+           ST_SetSRID(ST_MakePoint(x::double PRECISION, y::double PRECISION, z::double PRECISION), 4326)::geometry(pointz, 4326) AS geom_height
+   FROM stg.rad_data );
+
+
+ALTER TABLE proc.in_data ADD PRIMARY KEY (id);
+
+
+CREATE INDEX ON proc.in_data USING gist(geom);
+
+
+CREATE INDEX ON proc.in_data USING gist(geom_height);
+
+
+
+CREATE TABLE proc.voronoi as (
+SELECT (ST_Dump(
+            ST_CollectionExtract(
+                ST_VoronoiPolygons(
+                    ST_Collect(DISTINCT geom)
+                    )
+                ,3)
+            )).geom
+FROM proc.in_data);
+
+ALTER TABLE proc.voronoi 
+
+ALTER COLUMN geom TYPE geometry(polygon,25832)
+USING ST_Transform(geom,25832);
+SELECT (ST_Dump(
+            ST_CollectionExtract(
+                ST_DelaunayTriangles(
+                    ST_Collect(DISTINCT geom)
+                    )
+                ,3)
+            )).geom
+FROM proc.in_data;
+
+
+
+
+SELECT COUNT(*) 
+FROM proc.voronoi,public.vg250_f
+WHERE ST_Intersects(proc.voronoi.geom,public.vg250_f.geom);
+
+CREATE TABLE proc.clip2 AS 
+SELECT proc.voronoi.geoid,public.vg250_l.gid,ST_Union(ST_INTERSECTION(proc.voronoi.geom,public.vg250_l.geom))
+FROM proc.voronoi,public.vg250_l
+WHERE ST_Intersects(proc.voronoi.geom,public.vg250_l.geom)
+GROUP BY proc.voronoi.geoid,public.vg250_l.gid;
+
+CREATE TABLE proc.clip12 AS 
+select st_intersection(a.geom, b.geom), b.*
+from  public.vg250_f as a, proc.voronoi as b
+where not st_isempty(st_intersection(st_setsrid(b.geom,25832),
+  a.geom)) ;
+
+  SELECT * FROM proc.clip12 LIMIT 10;
+
+  alter table proc.clip12
+drop column st_intersection; 
+
+  
+
+SELECT * FROM proc.voronoi LIMIT 10;
+SELECT * FROM public.vg250_f LIMIT 10;
+SELECT * FROM proc.clip LIMIT 10;
+
+ALTER TABLE proc.voronoi ADD geoid integer;
+alter table proc.voronoi
+drop column gid; 
+
+UPDATE  proc.voronoi SET geoid =479-1;
+
+Update proc.voronoi set geoid  NUMBER(1,479) ;
+
+SELECT * FROM proc.voronoi ;
+
+
+SELECT st_union  FROM proc.clip WHERE st_union = "0103000020E86400000100000008000000A8BF141424E817C194E3B3B73A925441B259B5DED86E13C1F4EA67FE2F4A56411384017FD8420D41AA22E60400B75541CC100A4C206B11418E13FBD5B69A5541391016D4AC7A1241C016C9841A675541AC8CF7453378124143002D1258625541559A364013D810418B53C65C4F4A55 (...)";
+
+SELECT *
+FROM proc.voronoi INNER JOIN public.vg250_f ON ST_Intersects(proc.voronoi.geom,public.vg250_f.geom)LIMIT 10;
+
+
