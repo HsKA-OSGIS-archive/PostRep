@@ -61,7 +61,7 @@ for k in range(times):
                     'id':cont2})
  
 print('\nThe size of new data is: ' + str(len(all_data_list)) + ' after adding ' + str(len(all_data_list)-a) + ' values. \n')
- 
+ # Creating excel file
 with open('test_'+str(times)+'.csv', 'wb') as f2:
     writer = csv.DictWriter(f2,all_data_list[0].keys())
     writer.writeheader()
@@ -70,3 +70,4 @@ with open('test_'+str(times)+'.csv', 'wb') as f2:
  
 f.close()
 f2.close()
+
