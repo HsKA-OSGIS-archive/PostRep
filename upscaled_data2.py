@@ -2,6 +2,7 @@ import csv
 from random import uniform, random, choice
 from string import ascii_uppercase, ascii_lowercase
  
+# Empty data
 all_data_list, values_list, date_list = [], [], []
 city_list= []
 new_list_city, new_list_x, new_list_y, new_list_z = [], [], [], []
