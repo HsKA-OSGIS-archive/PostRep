@@ -32,5 +32,5 @@ Sponsored by the Free Software Foundation (FSF)
 
  the Free Software Foundation (FSF) is a nonprofit with a worldwide mission to promote computer user freedom. 
 
-FSF defend the rights of all software users.
+FSF defend the rights of all software users...
 
