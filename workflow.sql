@@ -39,26 +39,44 @@ CREATE SCHEMA proc;
 -- CREATE relational tables in processing schema
 -- #############################################################################
 
-/*
-CREATE TABLE proc.in_data AS
-  ( SELECT id,
-           place,
-           z::double PRECISION AS height,
-           date::TIMESTAMP,
-           val::double PRECISION,
-           ST_SetSRID(ST_MakePoint(x::double PRECISION, y::double PRECISION), 4326)::geometry(point, 4326) AS geom,
-           ST_SetSRID(ST_MakePoint(x::double PRECISION, y::double PRECISION, z::double PRECISION), 4326)::geometry(pointz, 4326) AS geom_height
-   FROM stg.rad_data );
-*/
 
--- #############################################################################
--- CREATE relational tables in processing schema
--- CHANGE TABLE NAMES ACCORDINGLY
--- #############################################################################
+
+CREATE TABLE proc.table1(id integer,place text,x text,y text,z text);
+
+
+CREATE TABLE proc.table2(id integer,place text,date text,value text);
+
+
+
+INSERT INTO proc.table1 SELECT id,place,x,y,z FROM stg.rad_data;
+
+
+INSERT INTO proc.table2 SELECT id,place,date,val FROM stg.rad_data;
+
+
 
 
 ALTER TABLE proc.table1 ADD PRIMARY KEY (id);
 ALTER TABLE proc.table2 ADD PRIMARY KEY (id);
+
+
+SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc1.table2 AS b JOIN proc1.table1 AS a ON a.id = b.id;
+
+
+
+CREATE TABLE proc.table3  (
+    id integer,
+    place text,
+    x text,
+    y text,
+    z text,
+    date text, 
+    val text
+);
+
+INSERT INTO proc.table3 SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc1.table2 AS b JOIN proc1.table1 AS a ON a.id = b.id;
+
+
 
 
 CREATE INDEX ON proc.table1 USING gist(geom);
