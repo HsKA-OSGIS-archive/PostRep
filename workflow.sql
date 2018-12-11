@@ -79,13 +79,20 @@ INSERT INTO proc.Station_Records SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value 
 
 
 
-CREATE INDEX ON proc.table1 USING gist(geom);
-CREATE INDEX ON proc.table2 USING gist(geom);
+CREATE INDEX ON proc.Station_info  USING gist(geom);
+CREATE INDEX ON proc.Records_info  USING gist(geom);
 
-/*
-CREATE INDEX ON proc.table1 USING gist(geom_height);
-CREATE INDEX ON proc.table2 USING gist(geom_height);
-*/
+
+CREATE INDEX ON proc.Station_info  USING gist(geom_height);
+CREATE INDEX ON proc.Records_info USING gist(geom_height);
+
+
+CREATE INDEX ON proc.Station_Records  USING gist(geom);
+
+CREATE INDEX ON proc.Station_Records  USING gist(geom_height);
+
+
+
 
 -- #############################################################################
 -- Function creating voronois + TIN per timestamp (clipped)
