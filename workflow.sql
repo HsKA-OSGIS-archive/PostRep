@@ -18,11 +18,14 @@ CREATE TABLE stg.rad_data (
 );
 
 
-copy stg.rad_data from '/home/user/PostRep/data.csv' delimiter ',' csv header
+\copy stg.rad_data from '/home/user/PostRep/data.csv' delimiter ' ' csv header
 
-ALTER TABLE stg.rad_data ADD fulldate text;
 
-UPDATE stg.rad_data SET fulldate = date|| ' ' || time;
+ALTER TABLE stg.rad_data ADD probe_time timestamp without time zone;
+
+
+UPDATE stg.rad_data SET probe_time = (date|| ' ' || time)::timestamp without time zone;
+
 
 ALTER TABLE stg.rad_data
 DROP COLUMN time;
@@ -30,6 +33,16 @@ DROP COLUMN time;
 
 ALTER TABLE stg.rad_data
 DROP COLUMN date;
+
+
+ALTER TABLE stg.rad_data 
+    ADD COLUMN geom geometry(point, 4326),
+    ADD COLUMN geom_3d geometry(pointz, 4326);
+
+
+UPDATE stg.rad_data
+SET geom = ST_SetSRID(ST_MakePoint(x::numeric, y::numeric), 4326),
+    geom_3d = ST_SetSRID(ST_MakePoint(x::numeric, y::numeric, z::numeric), 4326);
 
 
 CREATE SCHEMA proc;
@@ -40,60 +53,126 @@ CREATE SCHEMA proc;
 -- #############################################################################
 
 
-
-CREATE TABLE proc.Station_info (id integer,place text,x text,y text,z text);
-
-
-CREATE TABLE proc.Records_info (id integer,place text,date text,value text);
+DROP TABLE IF EXISTS proc.station_info;
 
 
-
-INSERT INTO proc.Station_info SELECT id,place,x,y,z FROM stg.rad_data;
-
-
-INSERT INTO proc.Records_info SELECT id,place,date,val FROM stg.rad_data;
-
-
-
-
-ALTER TABLE proc.Station_info ADD PRIMARY KEY (id);
-ALTER TABLE proc.Records_info ADD PRIMARY KEY (id);
+CREATE TABLE proc.station_info (
+    id int primary key, 
+    place text, 
+    geom geometry(Point, 4326),
+    geom_3d geometry(PointZ, 4326)
+    );
 
 
-SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc.Records_info AS b JOIN proc.Station_info AS a ON a.id = b.id;
+DROP TABLE IF EXISTS proc.records_info;
 
 
-
-CREATE TABLE proc.Station_Records  (
-    id integer,
-    place text,
-    x text,
-    y text,
-    z text,
-    date text, 
-    val text
-);
-
-INSERT INTO proc.Station_Records SELECT b.id,a.place,a.x,a.y,a.z,b.date,b.value FROM proc.Records_info AS b JOIN proc.Station_info AS a ON a.id = b.id;
+CREATE TABLE proc.records_info (
+    id int primary key , 
+    station_id int references proc.station_info(id),
+    place text, 
+    probe_time timestamp, 
+    value real
+    );
 
 
+INSERT INTO proc.station_info (id, place, geom, geom_3d) (
+    SELECT row_number() over() AS id,
+           foo.*
+    FROM
+      (SELECT DISTINCT ON (place, geom)
+            place,
+            geom,
+            geom_3d
+       FROM stg.rad_data) AS foo);
 
 
-CREATE INDEX ON proc.Station_info  USING gist(geom);
-CREATE INDEX ON proc.Records_info  USING gist(geom);
+INSERT INTO proc.records_info (id, place, probe_time, value, station_id)
+  ( SELECT a.id,
+           a.place,
+           a.probe_time,
+           a.val::real,
+           b.id
+   FROM stg.rad_data AS a
+   LEFT JOIN proc.station_info AS b ON a.place = b.place
+   AND a.geom = b.geom);
 
 
-CREATE INDEX ON proc.Station_info  USING gist(geom_height);
-CREATE INDEX ON proc.Records_info USING gist(geom_height);
+CREATE INDEX ON proc.station_info  USING gist(geom);
 
+CREATE INDEX ON proc.station_info  USING gist(geom_3d);
 
-CREATE INDEX ON proc.Station_Records  USING gist(geom);
-
-CREATE INDEX ON proc.Station_Records  USING gist(geom_height);
-
-
-
+-- #############################################################################
+-- IMPORT GERMANY DATA
+-- #############################################################################
+shp2pgsql -I -d -s 4326 /media/sf_f/tmp/germany.shp proc.germany | psql -d rad
 
 -- #############################################################################
 -- Function creating voronois + TIN per timestamp (clipped)
 -- #############################################################################
+
+DO $function$
+DECLARE 
+    _rec record;
+    _sql_vor text;
+    _sql_clip text;
+BEGIN
+    FOR _rec IN SELECT DISTINCT ON (probe_time) probe_time
+                FROM proc.records_info
+    LOOP
+        _sql_vor := format('
+                    CREATE TABLE proc.voronoi_%s as (
+                        SELECT (ST_Dump(
+                                    ST_CollectionExtract(
+                                        ST_VoronoiPolygons(
+                                            ST_Collect(b.geom)
+                                            )
+                                        ,3)
+                                    )).geom::geometry(Polygon, 4326) as geom
+                        FROM proc.records_info AS a
+                        LEFT JOIN proc.station_info AS b on a.station_id = b.id
+                        WHERE a.probe_time = %L
+                    );
+
+                    CREATE INDEX on proc.voronoi_%s USING gist(geom);
+                    ', 
+                    to_char(_rec.probe_time, 'YYYYMMDDHH24MM'),
+                    _rec.probe_time,
+                    to_char(_rec.probe_time, 'YYYYMMDDHH24MM')
+                    );
+
+                    /*
+                    %s -> test
+                    %L -> 'test' string
+                    %I -> "test"
+                    */
+        
+        RAISE notice '%', _sql_vor;
+
+        _sql_clip := format('
+                    CREATE TABLE proc.voronoi_%s_clip as (
+                        SELECT (ST_Dump(geom)).geom::geometry(POLYGON, 4326)
+                        FROM (
+                            SELECT 
+                                CASE
+                                    WHEN ST_Overlaps(a.geom, b.geom) THEN ST_Intersection(a.geom, b.geom)
+                                    WHEN ST_Within(a.geom, b.geom) THEN a.geom
+                                    ELSE NULL
+                                END as geom
+                            FROM proc.voronoi_%s as a
+                            LEFT JOIN proc.germany AS b on ST_Intersects(a.geom, b.geom)
+                            ) AS foo
+                        );
+
+                        CREATE INDEX ON proc.voronoi_%s_clip USING gist(geom);
+                    )
+        ', to_char(_rec.probe_time, 'YYYYMMDDHH24MM'),
+           to_char(_rec.probe_time, 'YYYYMMDDHH24MM'),
+           to_char(_rec.probe_time, 'YYYYMMDDHH24MM') 
+        );
+
+        raise notice '%', _sql_clip;
+    END LOOP;
+END;
+$function$
+LANGUAGE plpgsql;
