@@ -9,6 +9,7 @@ new_list_city, new_list_x, new_list_y, new_list_z = [], [], [], []
  
 times = 1000
  
+# To compare the min and max values for the coordinates
 x_min,y_min,z_min = 99999, 99999, 99999
 x_max, y_max, z_max = -99999, -99999, -99999
  
