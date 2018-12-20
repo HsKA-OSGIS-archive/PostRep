@@ -78,6 +78,7 @@ with open('new_test_'+str(times)+'.csv', 'wb') as f2:
 f.close()
 f2.close()
 print ('The process is finished.')
+# To see time
 final_time = time()
 execution_time = final_time - initial_time
 print ('The execution time was: '+ str(execution_time) + ' seconds.')  # En segundos
