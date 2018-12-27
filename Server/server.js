@@ -23,8 +23,8 @@ app.get('/', function (req, res, next) {
            console.log("not able to get connection "+ err);
            res.status(400).send(err);
        }
-       client.query('SELECT date,ST_ASgeoJSON(geom) as geometry FROM proc.voronoi', function(err,result) {
-           done(); // closing the connection;
+       done(); // closing the connection;
+       client.query('SELECT * FROM proc.getvoronoi(\'2015-10-12 00:00:00\')', function(err,result) {
            if(err){
                console.log(err);
                res.status(400).send(err);
@@ -46,7 +46,7 @@ app.get('/date', function (req, res, next) {
            console.log("not able to get connection "+ err);
            res.status(400).send(err);
        }
-       client.query('SELECT date FROM stg.rad_data group by date;', function(err,result) {
+       client.query('SELECT probe_time as date FROM proc.records_info group by probe_time order by probe_time;', function(err,result) {
            done(); // closing the connection;
            if(err){
                console.log(err);
@@ -73,7 +73,7 @@ app.get('/voronoi/:date', function (req, res, next) {
        rdate = rdate.split("+").join(" ");
        console.log(rdate);
        var sql ="(SELECT NULL::double PRECISION AS val,               '"+rdate+"'::TIMESTAMP AS date,               ST_ASgeoJSON((ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom) as geometry         FROM proc.in_data        WHERE date = '"+rdate+"');"
-
+       var sql = "SELECT * FROM proc.getvoronoi('"+rdate+"')"
        client.query(sql, function(err,result) {
            done(); // closing the connection;
            if(err){
@@ -161,7 +161,7 @@ app.get('/point/:date', function (req, res, next) {
 
        rdate = rdate.split("+").join(" ");
        console.log(rdate);
-       var sql ="select ST_asgeoJSON(geom) as geometry from proc.in_data where date='"+rdate+"';"
+       var sql ="select ST_asgeoJSON(geom) as geometry from proc.station_info;"
 
        client.query(sql, function(err,result) {
            done(); // closing the connection;

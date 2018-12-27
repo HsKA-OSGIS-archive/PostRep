@@ -67,7 +67,7 @@ function onEachFeature(feature,layer){
       "properties": {"type": "ocean"},
       geometry}
     var Lvor = L.geoJSON(pol, {style: voronoiStyle, onEachFeature:onEachFeature })
-    Lvor.bindPopup(geom[i].date);
+    Lvor.bindPopup(""+geom[i].val);
     Lvor.addTo(mymap)
   }
 }
