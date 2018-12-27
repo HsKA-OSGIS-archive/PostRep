@@ -72,8 +72,37 @@ app.get('/voronoi/:date', function (req, res, next) {
 
        rdate = rdate.split("+").join(" ");
        console.log(rdate);
-       var sql ="(SELECT NULL::double PRECISION AS val,               '"+rdate+"'::TIMESTAMP AS date,               ST_ASgeoJSON((ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom) as geometry         FROM proc.in_data        WHERE date = '"+rdate+"');"
+       //var sql ="(SELECT NULL::double PRECISION AS val,               '"+rdate+"'::TIMESTAMP AS date,               ST_ASgeoJSON((ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom) as geometry         FROM proc.in_data        WHERE date = '"+rdate+"');"
        var sql = "SELECT * FROM proc.getvoronoi('"+rdate+"')"
+       client.query(sql, function(err,result) {
+           done(); // closing the connection;
+           if(err){
+               console.log(err);
+               res.status(400).send(err);
+           }
+           //console.log(result);
+           res.status(200).send(result.rows);
+       });
+    });
+
+});
+
+app.get('/tin/:date', function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+
+    pg.connect(connectionString,function(err,client,done) {
+       if(err){
+           console.log("not able to get connection "+ err);
+           res.status(400).send(err);
+       }
+       var rdate =""+req.params.date
+
+       rdate = rdate.split("+").join(" ");
+       console.log(rdate);
+       //var sql ="(SELECT NULL::double PRECISION AS val,               '"+rdate+"'::TIMESTAMP AS date,               ST_ASgeoJSON((ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom) as geometry         FROM proc.in_data        WHERE date = '"+rdate+"');"
+       //var sql = "SELECT * FROM proc.gettin('"+rdate+"')"
+       var sql = "SELECT ST_ASgeoJSON(tin.geom) as geometry FROM proc.tin_clip as tin"
        client.query(sql, function(err,result) {
            done(); // closing the connection;
            if(err){
@@ -111,7 +140,63 @@ app.get('/voronoi/download/:date', function (req, res, next) {
        var rdate =""+req.params.date
 
        rdate = rdate.split("+").join(" ");
-       var sql ="SELECT NULL::double PRECISION AS val,               '"+rdate+"'::TIMESTAMP AS date,               (ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom         FROM proc.in_data        WHERE date = '"+rdate+"';"
+//       var sql ="SELECT NULL::double PRECISION AS val,               '"+rdate+"'::TIMESTAMP AS date,               (ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom         FROM proc.in_data        WHERE date = '"+rdate+"';"
+       var sql = "SELECT * FROM proc.getvoronoi('"+rdate+"')"
+
+       var command="pgsql2shp -f "+__dirname+"/export/1 -h localhost -p5432 -u user -g geom rad \""+sql+"\"";
+       const child = exec(command,
+           (error, stdout, stderr) => {
+               console.log(`stdout: ${stdout}`);
+               console.log(`stderr: ${stderr}`);
+               var zip = 'zip '+__dirname+'/export/1.zip '+__dirname+'/export/1.*'
+               const child = exec(zip,
+                   (error, stdout, stderr) => {
+                       console.log(`stdout: ${stdout}`);
+                       console.log(`stderr: ${stderr}`);
+
+                       var file = __dirname+'/export/1.zip';
+
+                       var filename = path.basename(file);
+                       var mimetype = mime.lookup(file);
+
+                       res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+                       res.setHeader('Content-type', mimetype);
+
+                       var filestream = fs.createReadStream(file);
+                       filestream.pipe(res);
+
+
+
+                       if (error !== null) {
+                           console.log(`exec error: ${error}`);
+                       }
+               });
+
+               if (error !== null) {
+                   console.log(`exec error: ${error}`);
+               }
+       });
+});
+});
+app.get('/tin/download/:date', function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  var del = 'yes|rm ~/PostRep/Server/export/*'
+  const child = exec(del,
+      (error, stdout, stderr) => {
+          console.log(`stdout: ${stdout}`);
+          console.log(`stderr: ${stderr}`);
+
+          if (error !== null) {
+              console.log(`exec error: ${error}`);
+          }
+       var rdate =""+req.params.date
+
+       rdate = rdate.split("+").join(" ");
+//       var sql ="SELECT NULL::double PRECISION AS val,               '"+rdate+"'::TIMESTAMP AS date,               (ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom         FROM proc.in_data        WHERE date = '"+rdate+"';"
+//       var sql = "SELECT * FROM proc.gettin('"+rdate+"')"
+       var sql = "SELECT ST_ASgeoJSON(tin.geom) as geometry FROM proc.tin_clip as tin"
+
        var command="pgsql2shp -f "+__dirname+"/export/1 -h localhost -p5432 -u user -g geom rad \""+sql+"\"";
        const child = exec(command,
            (error, stdout, stderr) => {

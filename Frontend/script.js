@@ -1,5 +1,5 @@
 var mymap=L.map('map').setView([ 48.79228, 9],6);
-function draw(geom){
+function draw(geom,xxx){
 	if(mymap!=null){
 		mymap.remove()
 		mymap=L.map('map').setView([ 48.79228, 9],6);
@@ -7,6 +7,7 @@ function draw(geom){
 var hoverColor = "white"
 var defaultColor = "green"
 var opacityColor = 0.6;
+if(xxx==1) opacityColor=0.3
 
 
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -22,7 +23,7 @@ var voronoiStyle ={
   		weight: 1,
       color: "white",
   		opacity: 1,
-  		fillOpacity: 0.6
+  		fillOpacity: opacityColor
   		};
 
 function highlightFeature(e) {
@@ -67,8 +68,10 @@ function onEachFeature(feature,layer){
       "properties": {"type": "ocean"},
       geometry}
     var Lvor = L.geoJSON(pol, {style: voronoiStyle, onEachFeature:onEachFeature })
-    Lvor.bindPopup(""+geom[i].val);
-    Lvor.addTo(mymap)
+		if(xxx==0)
+	    Lvor.bindPopup(""+geom[i].val);
+	    Lvor.addTo(mymap)
+
   }
 }
 
