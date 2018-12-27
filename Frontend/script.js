@@ -83,25 +83,7 @@ function draw_point(geom){
 	    color: '#333',
 	    fillColor: '#333',
 	    fillOpacity: 1,
-	    radius: 50
+	    radius: 25
 		}).addTo(mymap);
 	}
 }
-
-
-var xhttp = new XMLHttpRequest();
-var url = "http://localhost:4000";
-var respond;
-xhttp.onreadystatechange = function() {
-  if (this.readyState == 4 && this.status == 200) {
-    //console.log(xhttp.responseText);
-    respond = JSON.parse(xhttp.responseText);
-     // Action to be performed when the document is read;
-
-    draw(respond);
-  }
-};
-xhttp.open("GET", url, true);
-xhttp.setRequestHeader('Content-Type', 'text/plain');
-
-xhttp.send();

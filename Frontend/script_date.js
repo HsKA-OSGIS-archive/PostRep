@@ -7,7 +7,8 @@ function date(array){
 			var d= array[i].date;
 			list.innerHTML = list.innerHTML + '<option value="'+d+'">'+d+'</option>'
 		}
-
+		//initial map
+		getVoronoi();
 }
 
 var xhttp2 = new XMLHttpRequest();
@@ -27,6 +28,13 @@ xhttp2.setRequestHeader('Content-Type', 'text/plain');
 
 xhttp2.send();
 function downloadVoronoi(){
+	var str = document.getElementById("date").selectedOptions[0].innerHTML
+	str = str.split(" ").join("+")
+	var url = "http://localhost:4000/voronoi/download/"+str;
+
+	window.open(url, '_blank');
+}
+function downloadTIN(){
 	var str = document.getElementById("date").selectedOptions[0].innerHTML
 	str = str.split(" ").join("+")
 	var url = "http://localhost:4000/voronoi/download/"+str;
