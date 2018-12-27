@@ -4,5 +4,13 @@
   "dependencies": {
     "express": "^4.16.4",
     "pg": "^6.4.2"
-  }
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "version": "1.0.0",
+  "main": "FremdseinServer.js",
+  "devDependencies": {},
+  "license": "ISC",
+  "description": ""
 }
