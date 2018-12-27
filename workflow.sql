@@ -141,3 +141,49 @@ SELECT inData.id AS id,
 			proc.station_info AS inData
 	WHERE ST_intersects(inData.geom,myVoronoi.geom)
 	ORDER BY id);
+
+
+------------------TIN--------------------
+
+CREATE TEMPORARY TABLE tin AS (
+SELECT  (
+			ST_Dump(ST_CollectionExtract( ST_DelaunayTriangles(ST_Collect(DISTINCT geom)) ,3))).geom
+		FROM proc.station_info);
+
+
+
+CREATE INDEX ON tin  USING gist(geom);
+
+
+
+CREATE TABLE proc.tin_clip as (
+SELECT inData.id AS id,
+		myTin.geom as geom
+	FROM (
+
+                        SELECT (ST_Dump(geom)).geom::geometry(POLYGON, 4326)
+                        FROM (
+                            SELECT
+                                CASE
+                                    WHEN ST_Overlaps(a.geom, b.geom) THEN ST_Intersection(a.geom, b.geom)
+                                    WHEN ST_Within(a.geom, b.geom) THEN a.geom
+                                    ELSE NULL
+                                END as geom
+                            FROM tin as a
+                            LEFT JOIN proc.germany AS b on ST_Intersects(a.geom, b.geom)
+                            ) AS foo
+                        )AS myTin,
+			proc.station_info AS inData
+	WHERE ST_intersects(inData.geom,myTin.geom)
+	ORDER BY id);
+
+
+
+
+
+
+
+
+
+
+
