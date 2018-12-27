@@ -105,52 +105,25 @@ CREATE INDEX ON proc.station_info  USING gist(geom_3d);
 -- #############################################################################
 -- IMPORT GERMANY DATA
 -- #############################################################################
-shp2pgsql -I -d -s 4326 /media/sf_f/tmp/germany.shp proc.germany | psql -d rad
 
--- #############################################################################
--- Function creating voronois + TIN per timestamp (clipped)
--- #############################################################################
+shp2pgsql -I -d -s 4326 /home/user/PostRep/germany.shp proc.germany | psql -d rad
 
-DO $function$
-DECLARE 
-    _rec record;
-    _sql_vor text;
-    _sql_clip text;
-BEGIN
-    FOR _rec IN SELECT DISTINCT ON (probe_time) probe_time
-                FROM proc.records_info
-    LOOP
-        _sql_vor := format('
-                    CREATE TABLE proc.voronoi_%s as (
-                        SELECT (ST_Dump(
-                                    ST_CollectionExtract(
-                                        ST_VoronoiPolygons(
-                                            ST_Collect(b.geom)
-                                            )
-                                        ,3)
-                                    )).geom::geometry(Polygon, 4326) as geom
-                        FROM proc.records_info AS a
-                        LEFT JOIN proc.station_info AS b on a.station_id = b.id
-                        WHERE a.probe_time = %L
-                    );
 
-                    CREATE INDEX on proc.voronoi_%s USING gist(geom);
-                    ', 
-                    to_char(_rec.probe_time, 'YYYYMMDDHH24MM'),
-                    _rec.probe_time,
-                    to_char(_rec.probe_time, 'YYYYMMDDHH24MM')
-                    );
 
-                    /*
-                    %s -> test
-                    %L -> 'test' string
-                    %I -> "test"
-                    */
-        
-        RAISE notice '%', _sql_vor;
+CREATE TEMPORARY TABLE proc.voronoi AS (
+SELECT inData.id AS id, 
+		myVoronoi.geom as geom
+	FROM (
+		SELECT  (
+			ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom
+		FROM proc.station_info) AS myVoronoi,	
+			proc.station_info AS inData
+	WHERE ST_intersects(inData.geom,myVoronoi.geom)
+	ORDER BY id);
 
-        _sql_clip := format('
-                    CREATE TABLE proc.voronoi_%s_clip as (
+CREATE INDEX ON proc.voronoi  USING gist(geom);
+
+CREATE TABLE proc.voronoi_clip as (
                         SELECT (ST_Dump(geom)).geom::geometry(POLYGON, 4326)
                         FROM (
                             SELECT 
@@ -159,20 +132,7 @@ BEGIN
                                     WHEN ST_Within(a.geom, b.geom) THEN a.geom
                                     ELSE NULL
                                 END as geom
-                            FROM proc.voronoi_%s as a
+                            FROM proc.voronoi as a
                             LEFT JOIN proc.germany AS b on ST_Intersects(a.geom, b.geom)
                             ) AS foo
                         );
-
-                        CREATE INDEX ON proc.voronoi_%s_clip USING gist(geom);
-                    )
-        ', to_char(_rec.probe_time, 'YYYYMMDDHH24MM'),
-           to_char(_rec.probe_time, 'YYYYMMDDHH24MM'),
-           to_char(_rec.probe_time, 'YYYYMMDDHH24MM') 
-        );
-
-        raise notice '%', _sql_clip;
-    END LOOP;
-END;
-$function$
-LANGUAGE plpgsql;
