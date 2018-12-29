@@ -5,7 +5,8 @@ from string import ascii_uppercase, ascii_lowercase
 from time import time
  
 initial_time = time()
- 
+#-----------------------------------------------------------------------------
+#------------------ Functions------------------------------------------
 def polygon_coord_from_shp(file):
     """ Reads shapefile and extracts the coordinates of the polygon
         - Uses first feature
@@ -31,7 +32,7 @@ def point_in_polygon(x, y, polygon):
                 res = not res
         j = i
     return res
- 
+#-----------------------------------------------------------------------------
 # Empty lists
 all_data_list, city_list, date_list = [], [], []
 new_list_city, new_list_x, new_list_y, new_list_z = [], [], [], []
