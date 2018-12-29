@@ -32,18 +32,22 @@ def point_in_polygon(x, y, polygon):
         j = i
     return res
  
- 
-all_data_list, values_list, date_list = [], [], []
-city_list= []
+# Empty lists
+all_data_list, city_list, date_list = [], [], []
 new_list_city, new_list_x, new_list_y, new_list_z = [], [], [], []
  
-times = 100000
+
+""" Times to upscale data"""
+times = 1000
  
 x_min, y_min, z_min = 99999, 99999, 99999
 x_max, y_max, z_max = -99999, -99999, -99999
- 
-f = open('rad_data.csv', 'r')
-reader = csv.DictReader(f, delimiter=',')
+
+""" Open the original file from \home\user\PostRep\input
+	The header has to be added manually. Format:
+	id city x y z date time value """
+f = open(" \home\user\PostRep\input\rad_data.csv", "r")
+reader = csv.DictReader(f, delimiter=' ')
 for row in reader:
     all_data_list.append(row)
     if row['date']+',' + row['time'] not in date_list:
@@ -55,12 +59,15 @@ for row in reader:
     if y_max <= float(row['y']): y_max = float(row['y'])
     if z_min >= float(row['z']): z_min = float(row['z'])
     if z_max <= float(row['z']): z_max = float(row['z'])
+
+""" Since the original bourder of Germany  has too much borders to check, it has been simplified."""
+file2 = "\home\user\PostRep\Upscaled_data\Simplified_boundary_Germany\germany2.shp"
+polygon = polygon_coord_from_shp(file2) # Creating dictionary from shapefile
  
-file2 = "C:\Users\Nastyuja\Desktop\OpenSource\python\germany2.shp"
-polygon = polygon_coord_from_shp(file2)
- 
+# Creating new random points coordinates and City's names
 while len(new_list_x)!=times:
     x, y = uniform(x_min, x_max), uniform(y_min, y_max)
+    # Check if new created point is inside of the boundary
     if point_in_polygon(x, y, polygon)==True:
         new_list_x.append(x)
         new_list_y.append(y)
@@ -70,14 +77,15 @@ while len(new_list_x)!=times:
 num_total_new_points=len(date_list)*times
 cont2=len(all_data_list)-1
  
- 
+ # Creating new csv file with results
 with open('new_test_'+str(times)+'.csv', 'wb') as f2:
+    # Creating the header
     writer = csv.DictWriter(f2,all_data_list[0].keys())
     writer.writeheader()
- 
+    # Original data
     for row in all_data_list:
         writer.writerow(row)
- 
+    # Adding new data to the file
     for k in range(times):
         for m in range(len(date_list)):
             cont2 += 1
@@ -89,10 +97,11 @@ with open('new_test_'+str(times)+'.csv', 'wb') as f2:
                               'x': "{0:.3f}".format(new_list_x[k]),
                               'z': "{0:.3f}".format(new_list_z[k]),
                               'id': cont2}
- 
             writer.writerow(line)
+# Close the csv files
 f.close()
 f2.close()
+
 print ('The process is finished.')
 final_time = time()
 execution_time = final_time - initial_time
