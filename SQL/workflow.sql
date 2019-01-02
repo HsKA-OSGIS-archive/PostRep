@@ -110,6 +110,12 @@ shp2pgsql -I -d -s 4326 /home/user/PostRep/germany.shp proc.germany | psql -d ra
 
 
 
+-- #############################################################################
+-- CREATING VORONOI 
+-- #############################################################################
+
+
+
 CREATE TEMPORARY TABLE voronoi AS (
 SELECT  (
 			ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom
@@ -143,7 +149,9 @@ SELECT inData.id AS id,
 	ORDER BY id);
 
 
-------------------TIN--------------------
+-- #############################################################################
+-- CREATING TIN
+-- #############################################################################
 
 CREATE TEMPORARY TABLE tin AS (
 SELECT  (
