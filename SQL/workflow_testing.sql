@@ -76,6 +76,7 @@ CREATE TABLE proc.records_info (
     );
 
 
+
 INSERT INTO proc.station_info (id, place, geom, geom_3d) (
     SELECT row_number() over() AS id,
            foo.*
@@ -97,6 +98,8 @@ INSERT INTO proc.records_info (id, place, probe_time, value, station_id)
    LEFT JOIN proc.station_info AS b ON a.place = b.place
    AND a.geom = b.geom);
 
+CREATE INDEX ON proc.records_info  (station_id);
+CREATE INDEX ON proc.records_info  (probe_time);
 
 CREATE INDEX ON proc.station_info  USING gist(geom);
 
@@ -147,6 +150,8 @@ SELECT inData.id AS id,
 			proc.station_info AS inData
 	WHERE ST_intersects(inData.geom,myVoronoi.geom)
 	ORDER BY id);
+
+CREATE INDEX ON proc.voronoi_clip  (id);
 
 ALTER TABLE proc.voronoi_clip
 	ADD COLUMN val  real;
