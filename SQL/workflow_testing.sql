@@ -18,7 +18,7 @@ CREATE TABLE stg.rad_data (
 );
 
 
-\copy stg.rad_data from '/home/user/PostRep/data.csv' delimiter ',' csv header
+\copy stg.rad_data from '/home/user/postmaster/PostRep/input/data.csv' delimiter ',' csv header
 
 
 ALTER TABLE stg.rad_data ADD probe_time timestamp without time zone;
@@ -106,7 +106,7 @@ CREATE INDEX ON proc.station_info  USING gist(geom_3d);
 -- IMPORT GERMANY DATA
 -- #############################################################################
 
-shp2pgsql -I -d -s 4326 /home/user/PostRep/germany.shp proc.germany | psql -d rad
+shp2pgsql -I -d -s 4326 /home/user/postmaster/PostRep/input/germany.shp proc.germany | psql -d rad
 
 
 
@@ -148,14 +148,14 @@ SELECT inData.id AS id,
 	WHERE ST_intersects(inData.geom,myVoronoi.geom)
 	ORDER BY id);
 
-ALTER TABLE proc.vornoi_clip
-	ADD val :: real;
+ALTER TABLE proc.voronoi_clip
+	ADD COLUMN val  real;
 
-UPDATE TABLE proc.voronoi_clip AS a
-SET val = b.val
-FROM proc.records_infon AS b
+UPDATE  proc.voronoi_clip AS a
+SET val = b.value
+FROM proc.records_info AS b
 WHERE 	a.id =b.station_id
-	AND 	b.probe_time = '2015-10-12 21:50:00';
+  AND 	b.probe_time = '2015-10-12 21:50:00';
 
 
 
@@ -168,11 +168,7 @@ SELECT  (
 			ST_Dump(ST_CollectionExtract( ST_DelaunayTriangles(ST_Collect(DISTINCT geom)) ,3))).geom
 		FROM proc.station_info);
 
-
-
 CREATE INDEX ON tin  USING gist(geom);
-
-
 
 CREATE TABLE proc.tin_clip as (
 SELECT inData.id AS id,
