@@ -18,7 +18,7 @@ CREATE TABLE stg.rad_data (
 );
 
 
-\copy stg.rad_data from '/home/user/PostRep/data.csv' delimiter ' ' csv header
+\copy stg.rad_data from '/home/user/PostRep/data.csv' delimiter ',' csv header
 
 
 ALTER TABLE stg.rad_data ADD probe_time timestamp without time zone;
@@ -110,6 +110,12 @@ shp2pgsql -I -d -s 4326 /home/user/PostRep/germany.shp proc.germany | psql -d ra
 
 
 
+-- #############################################################################
+-- CREATING AND CLIPPING VORONOI 
+-- #############################################################################
+
+
+
 CREATE TEMPORARY TABLE voronoi AS (
 SELECT  (
 			ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom
@@ -143,7 +149,9 @@ SELECT inData.id AS id,
 	ORDER BY id);
 
 
-------------------TIN--------------------
+-- #############################################################################
+-- CREATING AND CLIPPING TIN
+-- #############################################################################
 
 CREATE TEMPORARY TABLE tin AS (
 SELECT  (
