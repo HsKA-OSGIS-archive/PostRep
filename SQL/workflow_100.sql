@@ -118,14 +118,14 @@ shp2pgsql -I -d -s 4326 /home/user/PostRep/germany.shp proc.germany | psql -d ra
 
 
 
-CREATE TEMPORARY TABLE voronoi AS (
+CREATE TEMPORARY TABLE voronoi_100 AS (
 SELECT  (
 			ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom
 		FROM proc.station_info_100);
 
 
 
-CREATE INDEX ON voronoi  USING gist(geom);
+CREATE INDEX ON voronoi_100  USING gist(geom);
 
 
 CREATE TABLE proc.voronoi_clip_100 as (
@@ -141,7 +141,7 @@ SELECT inData.id AS id,
                                     WHEN ST_Within(a.geom, b.geom) THEN a.geom
                                     ELSE NULL
                                 END as geom
-                            FROM voronoi as a
+                            FROM voronoi_100 as a
                             LEFT JOIN proc.germany AS b on ST_Intersects(a.geom, b.geom)
                             ) AS foo
                         )AS myVoronoi,
