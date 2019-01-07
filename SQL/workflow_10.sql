@@ -6,43 +6,43 @@
 -- #############################################################################
 
 
-CREATE TABLE stg.rad_data (
+CREATE TABLE stg.rad_data_10 (
+    id integer,
     place text,
-    val text,
+    x text,
+    y text,
+    z text,
     date text,
     time text,
-    y text,
-    x text,
-    z text,
-    id integer,
+    val text
 );
 
 
 
 
-\copy stg.rad_data from '/home/user/postmaster/PostRep/Upscaled_data/new_test_10.csv' delimiter ',' csv header
+\copy stg.rad_data_10 from '/home/user/PostRep/Upscaled_data/new_test_100.csv' delimiter ',' csv header
 
 
-ALTER TABLE stg.rad_data ADD probe_time timestamp without time zone;
+ALTER TABLE stg.rad_data_10 ADD probe_time timestamp without time zone;
 
 
-UPDATE stg.rad_data100 SET probe_time = ( to_char(to_date(date,'DD/MM/YYYY'),'YYYY-MM-DD')|| ' ' || time)::timestamp without time zone;
+UPDATE stg.rad_data_10 SET probe_time = (date|| ' ' || time)::timestamp without time zone;
 
 
-ALTER TABLE stg.rad_data
+ALTER TABLE stg.rad_data_10
 DROP COLUMN time;
 
 
-ALTER TABLE stg.rad_data
+ALTER TABLE stg.rad_data_10
 DROP COLUMN date;
 
 
-ALTER TABLE stg.rad_data
+ALTER TABLE stg.rad_data_10
     ADD COLUMN geom geometry(point, 4326),
     ADD COLUMN geom_3d geometry(pointz, 4326);
 
 
-UPDATE stg.rad_data
+UPDATE stg.rad_data_10
 SET geom = ST_SetSRID(ST_MakePoint(x::numeric, y::numeric), 4326),
     geom_3d = ST_SetSRID(ST_MakePoint(x::numeric, y::numeric, z::numeric), 4326);
 
@@ -55,10 +55,10 @@ CREATE SCHEMA proc;
 -- #############################################################################
 
 
-DROP TABLE IF EXISTS proc.station_info;
+DROP TABLE IF EXISTS proc.station_info_10;
 
 
-CREATE TABLE proc.station_info (
+CREATE TABLE proc.station_info_10 (
     id int primary key,
     place text,
     geom geometry(Point, 4326),
@@ -66,19 +66,19 @@ CREATE TABLE proc.station_info (
     );
 
 
-DROP TABLE IF EXISTS proc.records_info;
+DROP TABLE IF EXISTS proc.records_info_10;
 
 
-CREATE TABLE proc.records_info (
+CREATE TABLE proc.records_info_10 (
     id int primary key ,
-    station_id int references proc.station_info(id),
+    station_id int references proc.station_info_10(id),
     place text,
     probe_time timestamp,
     value real
     );
 
 
-INSERT INTO proc.station_info (id, place, geom, geom_3d) (
+INSERT INTO proc.station_info_10 (id, place, geom, geom_3d) (
     SELECT row_number() over() AS id,
            foo.*
     FROM
@@ -86,31 +86,29 @@ INSERT INTO proc.station_info (id, place, geom, geom_3d) (
             place,
             geom,
             geom_3d
-       FROM stg.rad_data) AS foo);
+       FROM stg.rad_data_10) AS foo);
 
 
-INSERT INTO proc.records_info (id, place, probe_time, value, station_id)
+INSERT INTO proc.records_info_10 (id, place, probe_time, value, station_id)
   ( SELECT a.id,
            a.place,
            a.probe_time,
            a.val::real,
            b.id
-   FROM stg.rad_data AS a
-   LEFT JOIN proc.station_info AS b ON a.place = b.place
+   FROM stg.rad_data_10 AS a
+   LEFT JOIN proc.station_info_10 AS b ON a.place = b.place
    AND a.geom = b.geom);
 
-CREATE INDEX ON proc.records_info  (station_id);
-CREATE INDEX ON proc.records_info  (probe_time);
 
-CREATE INDEX ON proc.station_info  USING gist(geom);
+CREATE INDEX ON proc.station_info_10  USING gist(geom);
 
-CREATE INDEX ON proc.station_info  USING gist(geom_3d);
+CREATE INDEX ON proc.station_info_10  USING gist(geom_3d);
 
 -- #############################################################################
 -- IMPORT GERMANY DATA
 -- #############################################################################
 
-shp2pgsql -I -d -s 4326 /home/user/postmaster/PostRep/input/germany.shp proc.germany | psql -d rad
+shp2pgsql -I -d -s 4326 /home/user/PostRep/germany.shp proc.germany | psql -d rad
 
 
 
@@ -123,15 +121,14 @@ shp2pgsql -I -d -s 4326 /home/user/postmaster/PostRep/input/germany.shp proc.ger
 CREATE TEMPORARY TABLE voronoi AS (
 SELECT  (
 			ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom
-		FROM proc.station_info);
+		FROM proc.station_info_10);
 
 
 
 CREATE INDEX ON voronoi  USING gist(geom);
 
 
-
-CREATE TABLE proc.voronoi_clip as (
+CREATE TABLE proc.voronoi_clip_10 as (
 SELECT inData.id AS id,
 		myVoronoi.geom as geom
 	FROM (
@@ -148,7 +145,7 @@ SELECT inData.id AS id,
                             LEFT JOIN proc.germany AS b on ST_Intersects(a.geom, b.geom)
                             ) AS foo
                         )AS myVoronoi,
-			proc.station_info AS inData
+			proc.station_info_10 AS inData
 	WHERE ST_intersects(inData.geom,myVoronoi.geom)
 	ORDER BY id);
 
@@ -160,7 +157,7 @@ SELECT inData.id AS id,
 CREATE TEMPORARY TABLE tin AS (
 SELECT  (
 			ST_Dump(ST_CollectionExtract( ST_DelaunayTriangles(ST_Collect(DISTINCT geom)) ,3))).geom
-		FROM proc.station_info);
+		FROM proc.station_info_10);
 
 
 
@@ -168,7 +165,7 @@ CREATE INDEX ON tin  USING gist(geom);
 
 
 
-CREATE TABLE proc.tin_clip as (
+CREATE TABLE proc.tin_clip_10 as (
 SELECT inData.id AS id,
 		myTin.geom as geom
 	FROM (
@@ -185,9 +182,10 @@ SELECT inData.id AS id,
                             LEFT JOIN proc.germany AS b on ST_Intersects(a.geom, b.geom)
                             ) AS foo
                         )AS myTin,
-			proc.station_info AS inData
+			proc.station_info_10 AS inData
 	WHERE ST_intersects(inData.geom,myTin.geom)
 	ORDER BY id);
+
 
   -- #############################################################################
   -- CREATING a FUNCTION FOR FRONTEND REQUESTS
@@ -205,12 +203,10 @@ SELECT inData.id AS id,
   	rec.value as val,
   	ST_ASgeoJSON(vor.geom) as geometry,
     vor.geom as geom
-  FROM proc.voronoi_clip as vor
-  LEFT JOIN proc.records_info as rec
+  FROM proc.voronoi_clip_10 as vor
+  LEFT JOIN proc.records_info_10 as rec
   	ON vor.id = rec.station_id
   	AND rec.probe_time = myDate;
   $$LANGUAGE SQL;
 
   --SELECT * FROM proc.getvoronoi('2015-10-12 00:00:00');
-
-
