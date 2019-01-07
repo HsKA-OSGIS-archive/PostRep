@@ -18,7 +18,7 @@ CREATE TABLE stg.rad_data (
 );
 
 
-\copy stg.rad_data from '/home/user/PostRep/data.csv' delimiter ',' csv header
+/copy stg.rad_data from '/home/user/PostRep/input/data.csv' delimiter ',' csv header/
 
 
 ALTER TABLE stg.rad_data ADD probe_time timestamp without time zone;
