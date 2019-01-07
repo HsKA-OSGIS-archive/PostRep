@@ -154,16 +154,12 @@ SELECT inData.id AS id,
 -- CREATING AND CLIPPING TIN
 -- #############################################################################
 
-CREATE TEMPORARY TABLE tin AS (
+CREATE TEMPORARY TABLE tin_100 AS (
 SELECT  (
 			ST_Dump(ST_CollectionExtract( ST_DelaunayTriangles(ST_Collect(DISTINCT geom)) ,3))).geom
 		FROM proc.station_info_100);
 
-
-
-CREATE INDEX ON tin  USING gist(geom);
-
-
+CREATE INDEX ON tin_100  USING gist(geom);
 
 CREATE TABLE proc.tin_clip_100 as (
 SELECT inData.id AS id,
@@ -178,7 +174,7 @@ SELECT inData.id AS id,
                                     WHEN ST_Within(a.geom, b.geom) THEN a.geom
                                     ELSE NULL
                                 END as geom
-                            FROM tin as a
+                            FROM tin_100 as a
                             LEFT JOIN proc.germany AS b on ST_Intersects(a.geom, b.geom)
                             ) AS foo
                         )AS myTin,
