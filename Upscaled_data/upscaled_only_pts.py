@@ -42,8 +42,8 @@ new_list_city, new_list_x, new_list_y, new_list_z = [], [], [], []
 x_min, y_min, z_min = 99999, 99999, 99999
 x_max, y_max, z_max = -99999, -99999, -99999
 cont=0
-
-""" Times to upscale data: """
+#-----------------------------------------------------------------------------
+#-------------------------   Times to upscale data:   ------------------------
 t = 1000
 print('Times to upscale is: ' + str(t))
 
@@ -53,15 +53,14 @@ print('Times to upscale is: ' + str(t))
 	id,city,x,y,z,date,time,value 
 """
 
-#f = open(" \home\user\PostRep\input\data.csv", "r")
 print('Openning the files..')
-f = open("data.csv", "r")
+f = open("/home/user/PostRep/input/data.csv", "r")
 reader = csv.DictReader(f, delimiter=',')
 
 '''Creating a new csv file:
     That file is to test upscaled data. 
     It will be introduce as relation table station_info in the DataBase.'''
-f2 = open('new_station_info_'+str(t)+'.csv', 'wb')
+f2 = open("/home/user/PostRep/Upscaled_data/new_station_info_"+str(t)+".csv", 'wb')
 # The names of resulting columuns for upscaled data
 csv_columns = ['id','city','x','y','z']
 writer = csv.DictWriter(f2,fieldnames=csv_columns)
@@ -88,7 +87,7 @@ for row in reader:
         if z_max <= float(row['z']): z_max = float(row['z'])
 
 """ Since the original bourder of Germany  has too much borders to check, it has been simplified."""
-file2 = "C:\Users\Nastyuja\Desktop\OpenSource\python\germany2.shp"
+file2 = "/home/user/PostRep/Upscaled_data/Simplified_boundary_Germany/germany2.shp"
 print('Opening shp file..')
 polygon = polygon_coord_from_shp(file2) # Creating dictionary from shapefile
 
