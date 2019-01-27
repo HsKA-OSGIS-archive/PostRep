@@ -1,8 +1,8 @@
-var mymap=L.map('map').setView([ 48.79228, 9],6);
+var mymap=L.map('map').setView([ 51.5, 10],6);
 function draw(geom,xxx){
 	if(mymap!=null){
 		mymap.remove()
-		mymap=L.map('map').setView([ 48.79228, 9],6);
+		mymap=L.map('map').setView([  51.5, 10],6);
 	}
 var hoverColor = "white"
 var defaultColor = "green"
