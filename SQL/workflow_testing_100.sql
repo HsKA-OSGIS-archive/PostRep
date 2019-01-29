@@ -1,4 +1,5 @@
-CREATE SCHEMA stg;
+﻿CREATE SCHEMA stg;
+
 
 -- #############################################################################
 -- Importing and formatting data
@@ -17,7 +18,7 @@ CREATE TABLE stg.rad_data (
 );
 
 
-/copy stg.rad_data from '/home/user/PostRep/input/data.csv' delimiter ',' csv header/
+\copy stg.rad_data from '/home/user/postmaster/PostRep/input/data.csv' delimiter ',' csv header
 
 
 ALTER TABLE stg.rad_data ADD probe_time timestamp without time zone;
@@ -75,6 +76,7 @@ CREATE TABLE proc.records_info (
     );
 
 
+
 INSERT INTO proc.station_info (id, place, geom, geom_3d) (
     SELECT row_number() over() AS id,
            foo.*
@@ -96,6 +98,8 @@ INSERT INTO proc.records_info (id, place, probe_time, value, station_id)
    LEFT JOIN proc.station_info AS b ON a.place = b.place
    AND a.geom = b.geom);
 
+CREATE INDEX ON proc.records_info  (station_id);
+CREATE INDEX ON proc.records_info  (probe_time);
 
 CREATE INDEX ON proc.station_info  USING gist(geom);
 
@@ -105,7 +109,7 @@ CREATE INDEX ON proc.station_info  USING gist(geom_3d);
 -- IMPORT GERMANY DATA
 -- #############################################################################
 
-shp2pgsql -I -d -s 4326 /home/user/PostRep/input/germany.shp proc.germany | psql -d rad
+shp2pgsql -I -d -s 4326 /home/user/postmaster/PostRep/input/germany.shp proc.germany | psql -d rad
 
 
 
@@ -114,8 +118,6 @@ shp2pgsql -I -d -s 4326 /home/user/PostRep/input/germany.shp proc.germany | psql
 -- #############################################################################
 
 
-
-DROP TABLE IF EXISTS voronoi;
 
 CREATE TEMPORARY TABLE voronoi AS (
 SELECT  (
@@ -149,17 +151,16 @@ SELECT inData.id AS id,
 	WHERE ST_intersects(inData.geom,myVoronoi.geom)
 	ORDER BY id);
 
-/*   for testiong protocol
+CREATE INDEX ON proc.voronoi_clip  (id);
 
 ALTER TABLE proc.voronoi_clip
-	ADD COLUMN val real;
+	ADD COLUMN val  real;
 
-UPDATE proc.voronoi_clip AS a
+UPDATE  proc.voronoi_clip AS a
 SET val = b.value
-FROM proc.records_info  AS b
+FROM proc.records_info AS b
 WHERE 	a.id =b.station_id
-	AND 	b.probe_time = '2015-10-12 21:50:00';  */
-
+  AND 	b.probe_time = '2015-10-12 21:50:00';
 
 
 
@@ -172,11 +173,7 @@ SELECT  (
 			ST_Dump(ST_CollectionExtract( ST_DelaunayTriangles(ST_Collect(DISTINCT geom)) ,3))).geom
 		FROM proc.station_info);
 
-
-
 CREATE INDEX ON tin  USING gist(geom);
-
-
 
 CREATE TABLE proc.tin_clip as (
 SELECT inData.id AS id,
