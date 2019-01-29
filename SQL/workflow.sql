@@ -1,4 +1,4 @@
-﻿CREATE SCHEMA stg;
+CREATE SCHEMA stg;
 
 
 -- #############################################################################
@@ -116,6 +116,8 @@ shp2pgsql -I -d -s 4326 /home/user/PostRep/germany.shp proc.germany | psql -d ra
 
 
 
+DROP TABLE IF EXISTS voronoi;
+
 CREATE TEMPORARY TABLE voronoi AS (
 SELECT  (
 			ST_Dump(ST_CollectionExtract(ST_VoronoiPolygons(ST_Collect(DISTINCT geom)) ,3))).geom
@@ -148,14 +150,17 @@ SELECT inData.id AS id,
 	WHERE ST_intersects(inData.geom,myVoronoi.geom)
 	ORDER BY id);
 
-ALTER TABLE proc.vornoi_clip
-	ADD val :: real;
+/*   for testiong protocol
 
-UPDATE TABLE proc.voronoi_clip AS a
-SET val = b.val
-FROM proc.records_infon AS b
+ALTER TABLE proc.voronoi_clip
+	ADD COLUMN val real;
+
+UPDATE proc.voronoi_clip AS a
+SET val = b.value
+FROM proc.records_info  AS b
 WHERE 	a.id =b.station_id
-	AND 	b.probe_time = '2015-10-12 21:50:00';
+	AND 	b.probe_time = '2015-10-12 21:50:00';  */
+
 
 
 
