@@ -143,8 +143,7 @@ To properly clip polygons, following cases must be taken into account to select 
 
 
 
-Note: the alias ‘a’ is for the table ‘record_info’ (timestamp, place, measurements) and the alias ‘b’ is for ‘station_info’ table (id, place, geometry)
-After all process, in order to fill a resulting table, the spatial join is done. This is can be realized only if a geometry shares any portion of space then they intersect with the boundary (ST_Intersects). The spatial join is a common use case in spatial databases, putting together two tables based on the spatial relationships of their geometry fields. Finally,it is ordered by id.
+Note: the alias ‘a’ is for the table ‘record_info’ (timestamp, place, measurements) and the alias ‘b’ is for ‘station_info’ table (id, Than, the intersect process with the boundary (ST_Intersects) is done. Finally,it is ordered by id.
 
 ## Frontend extension
 
